@@ -27,18 +27,24 @@ class Coloretto{
 
         Coloretto(int);
         ~Coloretto();
-        void generate_cards();
+        void generate_cards();  // 產生牌
         void next_round();
+
         char draw();
+        bool put_to_row(char, int);  // 抽完之後放到 row
         char* collect(int, int&);  // 回傳牌
+
         char num_to_card(int);
-        bool put_to_row(char, int);
-        bool is_continue_to_game();
+        
+        bool is_continue_to_game();  // 是否結束遊戲
+        bool is_round_ended();  // 是否下一輪
+
         bool is_rows_empty();
         bool is_rows_full();
-        bool is_round_ended();
+        
         int search_unfull_row();
         int select_collect_row();
+
         bool is_row_valid_to_put(int);
         bool is_row_valid_to_collect(int);
 
@@ -49,13 +55,17 @@ Coloretto::Coloretto(int num_of_player){
     totalDrawNum = 0;
     cards = new int[MAX_NUM_OF_CARDS];
     rowCard = new char*[ROW];
+    isRowCollected = new bool[ROW];
+    rowLength = new int[ROW];
+
     generate_cards();
-    rowLength = new int[ROW];  // can
+
     for(int i = 0; i < ROW; i++){
         rowLength[i] = 0;
         isRowCollected[i] = false;
         rowCard[i] = new char[LIMIT_CARDS];
     }
+    std::cout << "Ok\n";
 }
 
 void Coloretto::next_round(){
@@ -68,13 +78,11 @@ void Coloretto::next_round(){
 void Coloretto::generate_cards(){
     /* geanerate the order of cards be drawn */
     srand(time(NULL));
-	// A~G: normal color; P:+2; R:colorful(ranom); X:END
-	// int total_cards[2][10] = { { 9,9,9,9,9,9,9,10,3,1 },{ 0 } };  //number of each card
-	int remain = 76;  //remain control the remain number have not been drawn
+	int remain = 76;  // remain control the remain number have not been drawn
 
 	int arr[MAX_NUM_OF_CARDS];  // 抽牌的 array
 	for (int i = 0; i < MAX_NUM_OF_CARDS; i++)
-        arr[i] = i;  //generate an ordered array
+        arr[i] = i;  // generate an ordered array
 
     std::cout << "generate cards\n";
 
@@ -84,9 +92,9 @@ void Coloretto::generate_cards(){
 			continue;
 		}
         // 把還沒抽到的後面的排遞補到前面剛剛被抽到的數字的位置
-		int num = rand();  // select a random number
+		int num = rand();         // select a random number
         num = num % remain;
-		cards[i] = arr[num];  // allow the random number to the order i position
+		cards[i] = arr[num];     // allow the random number to the order i position
 		arr[num] = arr[76 - i];  // drawn card exchange with position num(have not been drawn)
 		remain--;  // shrink selection range
 	}
@@ -97,7 +105,6 @@ char* Coloretto::collect(int row, int& length){
     char* cardArray = new char[currentNum];
     // assign to new array container
 	for (int i = 0; i < currentNum; i++) {
-        // strcpy(cardArray[i], rowCard[row][i]);
 		cardArray[i] = rowCard[row][i];
         rowCard[row][i] = ' ';
 	}
@@ -133,7 +140,6 @@ bool Coloretto::put_to_row(char cardChar, int row){
 }
 
 bool Coloretto::is_continue_to_game() {
-    std::cout << "totalDrawNum: " << totalDrawNum << "\n";
 	if (totalDrawNum >= ENDCARDNUMBER) {  // END card show up
 		return false;
 	}
@@ -169,7 +175,6 @@ int Coloretto::select_collect_row(){
 }
 
 int Coloretto::search_unfull_row(){
-    
     for(int i = 0; i < ROW; i++){
         if(rowLength[i] < LIMIT_CARDS && isRowCollected[i] == false)
             return i;

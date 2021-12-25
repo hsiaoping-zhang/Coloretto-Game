@@ -7,11 +7,11 @@
 #define MAX_NUM_OF_CARDS 77
 
 namespace std{
+    
     class Player{
     protected:
         char cards[MAX_NUM_OF_CARDS];
         int num_of_cards;
-        
         
     public:
         Coloretto* game;
@@ -20,6 +20,8 @@ namespace std{
         ~Player();
         void collect(char*, int);
         void print_cards();
+        int count_score();
+        int find_max(int*, int);
     };
 
     Player::Player(){
@@ -48,19 +50,76 @@ namespace std{
         cout << endl;
     }
 
+    int Player::count_score(){
+        int scoreList[8] = { 0, 1, 3, 6, 10, 15, 21, 2 };  // score for number of cards
+        char name[10] = { 'A','B','C','D','E','F','G','P','R','X' };  // kind of cards
+        int counts[10] = {0};
+        int score = 0;
+
+        for(int i = 0; i < num_of_cards; i++){
+            char c = cards[i];
+            int index = 0;
+            switch(c){
+                case 'A':
+                    index = 0; break;
+                case 'B':
+                    index = 1; break;
+                case 'C':
+                    index = 2; break;
+                case 'D':
+                    index = 3; break;
+                case 'E':
+                    index = 4; break;
+                case 'F':
+                    index = 5; break;
+                case 'G':
+                    index = 6; break;
+                case 'P':
+                    index = 7; break;
+                default:
+                    counts[0] -= 1;  // 先扣掉再回加 
+            }
+            counts[index] += 1;
+        }
+        // 前三高的加分
+        for(int i = 0; i < 3; i++){
+            int index = find_max(counts, 7);
+            score += scoreList[index];
+            counts[index] = 0;
+        }
+        score += (counts[7] * 2);  // plus 2
+
+        // 後面的扣分
+        for(int i = 3; i < 7; i++){
+            int index = find_max(counts, 7);
+            score -= scoreList[index];
+            counts[index] = 0;
+        }
+        return score;
+    }
+
+    int Player::find_max(int* arr, int num){
+        int max = 0, index = 0;
+        for(int i = 0; i < num; i++){
+            if(arr[i] > max){
+                max = arr[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
     Player::~Player(){
     }
 
     class ComputerPlayer: public Player{
-        private:
-            /* data */
         public:
             ComputerPlayer(/* args */);
             ~ComputerPlayer();
             void play_game();
     };
 
-    ComputerPlayer::ComputerPlayer(/* args */){
+    ComputerPlayer::ComputerPlayer(){
     }
 
     void ComputerPlayer::play_game(){
@@ -92,9 +151,6 @@ namespace std{
 
     ComputerPlayer::~ComputerPlayer(){
     }
-
 }
-
-
 
 #endif

@@ -9,10 +9,10 @@
 using namespace std;
 
 void print_status(Coloretto, ComputerPlayer *, Player, int);
+void print_score(ComputerPlayer *, Player, int);
 
 int main()
 {
-
     /** allow user to be the last one player in a round **/
     srand(unsigned(time(NULL)));
     int num_of_player;
@@ -33,7 +33,7 @@ int main()
     user.game = gamePointer;
 
     while (1)
-    { // until ended game
+    {
         /** computer's player **/
         for (int i = 0; i < num_of_player - 1; i++)
         {
@@ -41,8 +41,7 @@ int main()
             computerPlayers[i].play_game();
             if (game.is_round_ended())
             {
-                cout << "----------ROUND END---------\n"
-                     << endl;
+                cout << "----------ROUND END---------\n" << endl;
                 game.next_round();
                 for (int i = 0; i < num_of_player - 1; i++)
                 {
@@ -125,8 +124,7 @@ int main()
             if (is_continue)
             {
                 // next round
-                cout << "----------ROUND END---------\n"
-                     << endl;
+                cout << "----------ROUND END---------\n" << endl;
                 game.next_round();
                 for (int i = 0; i < num_of_player - 1; i++)
                 {
@@ -145,10 +143,10 @@ int main()
     cout << "------------- END GAME -------------" << endl;
     print_status(game, computerPlayers, user, num_of_player);
     // 3. score board
+    print_score(computerPlayers, user, num_of_player);
 }
 
-void print_status(Coloretto game, ComputerPlayer *computer, Player user,
-                  int num_of_player)
+void print_status(Coloretto game, ComputerPlayer *computer, Player user, int num_of_player)
 {
     /* display row cards */
     cout << "----------------" << endl;
@@ -170,10 +168,18 @@ void print_status(Coloretto game, ComputerPlayer *computer, Player user,
     cout << "----------------" << endl;
     for (int i = 0; i < num_of_player - 1; i++)
     {
-        cout << "player " << i + 1 << "  |  ";
+        cout << "Computer " << i + 1 << "  |  ";
         computer[i].print_cards();
     }
-    cout << "User "
-         << "  |  ";
+    cout << "User |  ";
     user.print_cards();
+}
+
+void print_score(ComputerPlayer *computer, Player user, int num_of_player){
+    cout << "- - - Score - - -" << endl;
+    for (int i = 0; i < num_of_player - 1; i++)
+    {
+        cout << "Computer " << i + 1 << "  |  " << computer[i].count_score() << endl;
+    }
+    cout << "User |  " << user.count_score() << endl;
 }
