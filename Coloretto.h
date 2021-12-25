@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <string.h>
 
 class Coloretto{
     private:
@@ -18,10 +19,11 @@ class Coloretto{
         
         int* rowLength;  // 每行牌的數量
         bool* isRowCollected; // 這回合是否被 collect 了
-        int totalDrawNum; // 目前抽牌數
+        
 
     public:
         char** rowCard; // 每行的牌
+        int totalDrawNum; // 目前抽牌數
 
         Coloretto(int);
         ~Coloretto();
@@ -36,6 +38,7 @@ class Coloretto{
         bool is_rows_full();
         bool is_round_ended();
         int search_unfull_row();
+        int select_collect_row();
         bool is_row_valid_to_put(int);
         bool is_row_valid_to_collect(int);
 
@@ -44,11 +47,14 @@ class Coloretto{
 Coloretto::Coloretto(int num_of_player){
     // intialize
     totalDrawNum = 0;
+    cards = new int[MAX_NUM_OF_CARDS];
+    rowCard = new char*[ROW];
     generate_cards();
     rowLength = new int[ROW];  // can
     for(int i = 0; i < ROW; i++){
         rowLength[i] = 0;
         isRowCollected[i] = false;
+        rowCard[i] = new char[LIMIT_CARDS];
     }
 }
 
@@ -67,11 +73,13 @@ void Coloretto::generate_cards(){
 	int remain = 76;  //remain control the remain number have not been drawn
 
 	int arr[MAX_NUM_OF_CARDS];  // 抽牌的 array
-	for (int i = 0; i < MAX_NUM_OF_CARDS; arr[i] = i, i++);  //generate an ordered array
+	for (int i = 0; i < MAX_NUM_OF_CARDS; i++)
+        arr[i] = i;  //generate an ordered array
 
+    std::cout << "generate cards\n";
 
 	for (int i = 0; i < MAX_NUM_OF_CARDS; i++) {
-		if (i == 62) {
+		if(i == 62) {
 			cards[i] = 76;  //X: END
 			continue;
 		}
@@ -89,14 +97,13 @@ char* Coloretto::collect(int row, int& length){
     char* cardArray = new char[currentNum];
     // assign to new array container
 	for (int i = 0; i < currentNum; i++) {
+        // strcpy(cardArray[i], rowCard[row][i]);
 		cardArray[i] = rowCard[row][i];
         rowCard[row][i] = ' ';
 	}
+    
     isRowCollected[row] = true;  // block
     length = currentNum;
-    // top[row] = 0;
-	// rowCard[row][3] = '0';  // no access
-	// temp[0] = 1, temp[1] = card_num;
 
 	return cardArray;
 }
@@ -121,12 +128,13 @@ bool Coloretto::put_to_row(char cardChar, int row){
     if(currentNum == LIMIT_CARDS)
         return false;
     rowCard[row][currentNum] = cardChar;
-    currentNum += 1;
+    rowLength[row] += 1;
     return true;
 }
 
 bool Coloretto::is_continue_to_game() {
-	if (totalDrawNum > ENDCARDNUMBER) {  // END card show up
+    std::cout << "totalDrawNum: " << totalDrawNum << "\n";
+	if (totalDrawNum >= ENDCARDNUMBER) {  // END card show up
 		return false;
 	}
 	return true;
@@ -144,7 +152,7 @@ bool Coloretto::is_rows_empty(){
 
 bool Coloretto::is_rows_full(){
     for(int i = 0; i < ROW; i++){
-        if(rowLength[i] == LIMIT_CARDS)
+        if(rowLength[i] == LIMIT_CARDS || isRowCollected[i])
             continue;
         else
             return false;
@@ -152,10 +160,18 @@ bool Coloretto::is_rows_full(){
     return true;
 }
 
+int Coloretto::select_collect_row(){
+    for(int i = 0; i < ROW; i++){
+        if(isRowCollected[i] == false && rowLength[i] != 0)
+            return i;
+    }
+    return -1;
+}
+
 int Coloretto::search_unfull_row(){
     
     for(int i = 0; i < ROW; i++){
-        if(rowLength[i] < LIMIT_CARDS)
+        if(rowLength[i] < LIMIT_CARDS && isRowCollected[i] == false)
             return i;
     }
     return -1;
@@ -164,7 +180,7 @@ int Coloretto::search_unfull_row(){
 bool Coloretto::is_row_valid_to_put(int row){
     if(row < 0 || row >= ROW)  // invalid input
         return false;
-
+    std::cout << "length:" << rowLength[row] << "\n";
     if(rowLength[row] == LIMIT_CARDS || isRowCollected[row])
         return false;
     return true;
@@ -173,7 +189,8 @@ bool Coloretto::is_row_valid_to_put(int row){
 bool Coloretto::is_row_valid_to_collect(int row){
     if(row < 0 || row >= ROW)  // invalid input
         return false;
-        
+    
+    std::cout << "length:" << rowLength[row] << "\n";
     if(isRowCollected[row] || rowLength[row] == 0)
         return false;
     return true;

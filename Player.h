@@ -34,16 +34,16 @@ namespace std{
     void Player::collect(char* card_array, int num){
         // collect to player's cards
         for(int i = 0; i < num; i++){
-            cards[num_of_cards] = card_array[i];
-            num_of_cards += 1;
+            cards[num_of_cards + i] = card_array[i];
         }
+        num_of_cards += num;
         // take a rest
         is_continue_round = false;
     }
 
     void Player::print_cards(){
         for(int i = 0; i < num_of_cards; i++){
-            cout << cards[i] << " ";
+            cout << cards[i] << ", ";
         }
         cout << endl;
     }
@@ -72,10 +72,11 @@ namespace std{
         }
 
         if(game->is_rows_full()){
-            // collect a row
             int arrayLength = 0;
-            char* cardArray = game->collect(rand() % 3, arrayLength);
-            cout << "collect length: " << arrayLength <<  arrayLength << endl;
+            int row = game->select_collect_row();  // 選擇一個還可以 collect 的 row
+            if(row == -1) return;  // there is no valid cards in rows
+            char* cardArray = game->collect(row, arrayLength);
+            cout << "COLLECT row: " << row + 1 << endl;
             collect(cardArray, arrayLength);
             is_continue_round = false;
             return;
@@ -83,7 +84,7 @@ namespace std{
 
         // 沒有全滿也沒有全空的狀況下: always draw
         char getCard = game->draw();  // with no collect, then draw card 
-        cout << "DRAW. get: " << getCard << endl;
+        cout << "DRAW get: " << getCard << endl;
         int row = game->search_unfull_row();
         game->put_to_row(getCard, row);
         
